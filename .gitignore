@@ -1,6 +1,8 @@
 node_modules/
 .clientatlas/
 *.swp
+.playwright-mcp/
+clientatlas-*.png
 .next/
 dist/
 coverage/

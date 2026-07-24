@@ -22,6 +22,10 @@ Status date: 2026-07-24
 - Thirty-case synthetic evaluation dataset and measured retrieval baseline.
 - OpenTelemetry, Prometheus, Grafana, secret scanning, architecture checks,
   CI, production images, and synthetic seed tooling.
+- Responsive Next.js workspace, authentication, onboarding, knowledge, cited
+  chat, artifact, integration, membership, settings, and system-state screens.
+- Synthetic read-only behavior, typed API/SSE adapters, mobile navigation, and
+  automated WCAG accessibility regression tests.
 
 ## External acceptance still required
 
@@ -29,7 +33,8 @@ Status date: 2026-07-24
 - A Google development OAuth app must exercise real Picker and revocation.
 - Ollama models must be downloaded for generation, citation, and abstention
   evaluation.
-- The separately built frontend must consume the OpenAPI and SSE contracts.
+- A configured authenticated frontend session must complete the live Supabase
+  and FastAPI acceptance flow; the unconfigured default remains synthetic.
 - A free public host must be deployed with synthetic read-only data.
 - The demonstration video must be recorded after the frontend and URL exist.
 

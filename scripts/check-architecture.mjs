@@ -14,19 +14,16 @@ async function walk(directory) {
       continue;
     }
     const projectPath = relative(root, path);
-    if (
-      /(^|\/)(page|layout)\.(tsx|jsx)$/.test(projectPath) ||
-      extname(path) === ".css"
-    ) {
-      violations.push(`${projectPath}: frontend file is forbidden`);
-    }
-    if (
+    const isProductSource =
       /apps\/product-api\/(app|src)\//.test(projectPath) &&
-      [".ts", ".tsx"].includes(extname(path))
-    ) {
+      [".ts", ".tsx", ".js", ".jsx"].includes(extname(path));
+    if (isProductSource) {
       const source = await readFile(path, "utf8");
       if (/service[_-]?role|MIGRATION_DATABASE_URL/i.test(source)) {
         violations.push(`${projectPath}: privileged credential reference`);
+      }
+      if (/SUPABASE_SERVICE_ROLE_KEY|serviceRoleKey/.test(source)) {
+        violations.push(`${projectPath}: service-role credential reference`);
       }
     }
   }

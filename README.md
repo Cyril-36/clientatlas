@@ -5,13 +5,14 @@ consultancies, implementation teams, and customer-success teams. It turns
 client documents into cited answers, editable onboarding briefs, readiness
 reports, and action plans.
 
-The V1 backend is implemented around a zero-cash-cost constraint. The frontend
-is intentionally excluded for a separate design/build workflow.
+The V1 product application is implemented around a zero-cash-cost constraint.
+It includes a responsive Next.js frontend, Node.js route handlers, and the
+FastAPI AI service.
 
 ## V1 architecture
 
 ```text
-Headless Next.js product API using Node.js route handlers
+Next.js product application and Node.js route handlers
         |
         +-- Supabase Auth
         |
@@ -61,9 +62,13 @@ through a recorded authenticated flow.
 - **Deferred:** intentionally excluded from V1.
 - **Proposed:** not yet accepted.
 
-## Implemented backend slice
+## Implemented V1
 
-- Headless Next.js route handlers for health, organizations, and workspaces
+- Responsive ClientAtlas workspace UI based on the Kinetic Enterprise design
+- Synthetic read-only demo data with administrative mutations disabled
+- Optional Supabase browser authentication using the public anonymous key
+- Typed product API, upload, and SSE chat client boundaries
+- Next.js route handlers for health, organizations, and workspaces
 - Strict Supabase asymmetric-JWT verification
 - Shared claims plus effective-role database contract in TypeScript and Python
 - Drizzle schema for organizations, memberships, workspaces, and audit events
@@ -80,17 +85,16 @@ through a recorded authenticated flow.
 - Thirty-case evaluation suite and measured retrieval report
 - OpenTelemetry, Prometheus, Grafana, architecture, and secret-scanning gates
 
-No application frontend has been created.
-
-Backend handoff:
+Product and integration references:
 
 - [API and frontend contract](docs/API.md)
+- [Frontend modes and routes](docs/FRONTEND.md)
 - [Exact implementation status](docs/IMPLEMENTATION_STATUS.md)
 - [Evaluation results and method](docs/EVALUATION.md)
 - [Local runbook](docs/runbooks/LOCAL_DEVELOPMENT.md)
 - Generated OpenAPI: `packages/contracts/openapi/ai-service.json`
 
-## Local backend setup
+## Local setup
 
 Requirements: Node.js 24, npm, Python 3.11-3.13, uv, and Docker.
 
@@ -106,10 +110,11 @@ Apply the local migration:
 MIGRATION_DATABASE_URL=postgresql://postgres:local-migration-only@127.0.0.1:55432/clientatlas npm run db:migrate
 ```
 
-Copy `.env.example` values into the process environment before starting the
-headless product API. A real Supabase project or local Supabase Auth instance is
-required to issue tokens and expose JWKS; the standalone PostgreSQL container
-only provides the database and RLS test environment.
+Copy `.env.example` values into the process environment. Without browser-safe
+Supabase variables the UI starts in a synthetic read-only demonstration mode.
+A real Supabase project or local Supabase Auth instance is required to issue
+tokens and expose JWKS; the standalone PostgreSQL container only provides the
+database and RLS test environment.
 
 ```bash
 npm run dev:api

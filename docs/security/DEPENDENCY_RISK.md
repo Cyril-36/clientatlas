@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| Status | Open, accepted for backend foundation only |
+| Status | Open, accepted for V1 application |
 | Recorded | 2026-07-24 |
 | Revisit | Every Next.js stable release and before public deployment |
 
@@ -22,26 +22,29 @@ and would not be a safe remediation.
 
 ### Current exposure
 
-The implemented Next.js application is a headless route-handler host:
+The implemented Next.js application now serves the product UI and route
+handlers:
 
-- no pages or user-authored CSS;
-- no stylesheet transformation endpoint;
+- user-authored CSS is compiled at build time;
+- runtime requests cannot submit stylesheets for transformation;
 - no image upload or image-optimization route;
-- no frontend assets; and
+- no use of Next.js image optimization for untrusted URLs; and
 - no untrusted source maps.
 
-This reduces reachability but does not remove the vulnerable packages.
+The frontend increases package reachability compared with the original
+headless host. The application therefore retains this as an explicit release
+risk rather than treating the earlier reduced exposure as sufficient.
 
 ### Mitigations
 
-- Do not add CSS, image handling, or frontend features in this repository.
-- Keep the Node API container and dependencies minimal.
+- Keep remote images and runtime stylesheet transformation disabled.
+- Use local CSS and Lucide SVG components rather than untrusted image URLs.
 - Run `npm audit --omit=dev` on every dependency update.
 - CI blocks critical advisories while this documented high-severity exception is
   open.
 - Upgrade to the first compatible stable Next.js release that resolves both
   dependency chains.
-- Reassess reachability before any public deployment.
+- Reassess reachability before public deployment and after each Next.js update.
 
 ### Closure
 
@@ -51,4 +54,3 @@ Close only when:
 2. `npm audit --omit=dev` reports no corresponding advisories;
 3. the production build passes; and
 4. API and RLS tests remain green.
-

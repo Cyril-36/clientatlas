@@ -1,7 +1,8 @@
-# ClientAtlas Backend API
+# ClientAtlas API and Frontend Boundary
 
-The repository intentionally contains no frontend. The generated FastAPI
-contract is committed at `packages/contracts/openapi/ai-service.json`.
+The responsive Next.js frontend lives in `apps/product-api`. The generated
+FastAPI contract is committed at
+`packages/contracts/openapi/ai-service.json`.
 
 All tenant endpoints require a Supabase access token:
 

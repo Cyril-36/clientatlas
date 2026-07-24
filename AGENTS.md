@@ -1,9 +1,11 @@
 # Agent Instructions
 
 ## Scope
-- Build backend, database, AI, tests, infrastructure, and documentation.
-- Do not create pages, components, styles, design tokens, or other frontend UI.
-- Keep `apps/product-api` limited to Next.js route handlers and server modules.
+- Build the ClientAtlas product application, backend, database, AI, tests,
+  infrastructure, and documentation.
+- Keep frontend pages and components in `apps/product-api`; preserve the
+  existing route-handler and Drizzle security boundaries.
+- Public demo UI must remain synthetic and must not enable tenant mutations.
 - Treat `docs/architecture/RFC-001-clientatlas-v1.md` as the frozen contract.
 
 ## Package Managers
@@ -37,4 +39,3 @@ AI commits MUST include:
 ```text
 Co-Authored-By: (the agent model's name and attribution byline)
 ```
-
