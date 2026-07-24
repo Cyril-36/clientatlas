@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import io
 import os
 from collections.abc import Awaitable, Callable
@@ -11,6 +12,7 @@ import pytest
 from anyio import to_thread
 from docx import Document
 from sqlalchemy import text
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -84,6 +86,7 @@ async def test_docx_ingestion_retrieval_visibility_and_deletion(
         embeddings=DeterministicEmbeddingProvider(),
         max_upload_bytes=1_000_000,
     )
+    oauth_state_hash = hashlib.sha256(str(user_a).encode()).hexdigest()
 
     async def as_user(
         claims: VerifiedClaims,
@@ -133,6 +136,50 @@ async def test_docx_ingestion_retrieval_visibility_and_deletion(
             claims_for(user_a),
             create_workspace,
         )
+
+        async def create_oauth_state(session: AsyncSession) -> None:
+            await session.execute(
+                text(
+                    """
+                    select app.begin_google_drive_oauth(
+                      :organization_id,
+                      :workspace_id,
+                      :state_hash,
+                      :encrypted_verifier,
+                      now() + interval '10 minutes'
+                    )
+                    """
+                ),
+                {
+                    "encrypted_verifier": b"encrypted-test-verifier",
+                    "organization_id": organization_id,
+                    "state_hash": oauth_state_hash,
+                    "workspace_id": workspace_id,
+                },
+            )
+
+        async def consume_oauth_state(session: AsyncSession) -> int:
+            result = await session.execute(
+                text(
+                    "select count(*) from app.consume_google_drive_oauth(:state_hash)"
+                ),
+                {"state_hash": oauth_state_hash},
+            )
+            return int(result.scalar_one())
+
+        await as_user(claims_for(user_a), create_oauth_state)
+        assert await as_user(claims_for(user_b), consume_oauth_state) == 0
+        assert await as_user(claims_for(user_a), consume_oauth_state) == 1
+        assert await as_user(claims_for(user_a), consume_oauth_state) == 0
+
+        async def read_private_credentials(session: AsyncSession) -> None:
+            await session.execute(
+                text("select * from private.google_drive_credentials")
+            )
+
+        with pytest.raises(ProgrammingError):
+            await as_user(claims_for(user_a), read_private_credentials)
+
         queued = await service.queue_upload(
             claims=claims_for(user_a),
             organization_id=organization_id,

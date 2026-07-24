@@ -5,6 +5,7 @@ from jwt import InvalidTokenError
 from clientatlas_ai.errors import SafeServiceError
 from clientatlas_ai.routes_artifacts import router as artifacts_router
 from clientatlas_ai.routes_chat import router as chat_router
+from clientatlas_ai.routes_google_drive import router as google_drive_router
 from clientatlas_ai.routes_retrieval import router as retrieval_router
 from clientatlas_ai.routes_sources import router as sources_router
 
@@ -19,6 +20,7 @@ app.include_router(sources_router)
 app.include_router(retrieval_router)
 app.include_router(chat_router)
 app.include_router(artifacts_router)
+app.include_router(google_drive_router)
 
 
 @app.exception_handler(InvalidTokenError)

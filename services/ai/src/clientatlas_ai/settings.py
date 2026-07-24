@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = 90.0
     gemini_api_key: SecretStr | None = None
     gemini_model: str = "gemini-2.5-flash-lite"
+    google_oauth_client_id: str | None = None
+    google_oauth_client_secret: SecretStr | None = None
+    google_oauth_redirect_uri: AnyHttpUrl | None = None
+    token_encryption_key: SecretStr | None = None
 
 
 @lru_cache
