@@ -27,9 +27,20 @@ Status date: 2026-07-24
 - Synthetic read-only behavior, typed API/SSE adapters, mobile navigation, and
   automated WCAG accessibility regression tests.
 
+## Live Supabase acceptance
+
+- A real Supabase Free project is active in Mumbai.
+- All versioned schema migrations, forced RLS policies, pgvector, and the
+  private `clientatlas-sources` Storage bucket are applied.
+- The browser-safe project URL and publishable key are configured only in an
+  ignored local environment file.
+- The dedicated database runtime role is separate from migration ownership,
+  `NOBYPASSRLS`, and restricted to the fixed `authenticated` role.
+
 ## External acceptance still required
 
-- A real Supabase project must run the Storage signed-URL matrix.
+- The real Supabase project must complete the authenticated Storage signed-URL
+  matrix with two tenants.
 - A Google development OAuth app must exercise real Picker and revocation.
 - Ollama models must be downloaded for generation, citation, and abstention
   evaluation.

@@ -110,6 +110,10 @@ Apply the local migration:
 MIGRATION_DATABASE_URL=postgresql://postgres:local-migration-only@127.0.0.1:55432/clientatlas npm run db:migrate
 ```
 
+For the configured free Supabase project, credential boundaries, and live
+verification checklist, see
+[`docs/runbooks/SUPABASE_FREE.md`](docs/runbooks/SUPABASE_FREE.md).
+
 Copy `.env.example` values into the process environment. Without browser-safe
 Supabase variables the UI starts in a synthetic read-only demonstration mode.
 A real Supabase project or local Supabase Auth instance is required to issue
