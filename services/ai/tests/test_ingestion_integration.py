@@ -21,6 +21,10 @@ from clientatlas_ai import database
 from clientatlas_ai.auth import VerifiedClaims
 from clientatlas_ai.documents import DOCX_MIME
 from clientatlas_ai.embeddings import DeterministicEmbeddingProvider
+from clientatlas_ai.generation import (
+    AnswerService,
+    DeterministicGenerationProvider,
+)
 from clientatlas_ai.ingestion import IngestionService
 from clientatlas_ai.retrieval import RetrievalService
 from clientatlas_ai.storage import LocalObjectStorage
@@ -181,6 +185,34 @@ async def test_docx_ingestion_retrieval_visibility_and_deletion(
             top_k=5,
         )
         assert other_tenant_evidence == ()
+
+        answers = AnswerService(
+            retrieval=retrieval,
+            local_provider=DeterministicGenerationProvider(),
+        )
+        answer = await answers.answer(
+            claims=claims_for(user_a),
+            organization_id=organization_id,
+            workspace_id=workspace_id,
+            question="Who is the implementation owner?",
+            conversation_id=None,
+        )
+        assert not answer.abstained
+        assert len(answer.citations) == 1
+        assert answer.provider == "deterministic"
+
+        async def visible_messages(session: AsyncSession) -> int:
+            result = await session.execute(
+                text(
+                    "select count(*) from app.messages "
+                    "where conversation_id = :conversation_id"
+                ),
+                {"conversation_id": answer.conversation_id},
+            )
+            return int(result.scalar_one())
+
+        assert await as_user(claims_for(user_a), visible_messages) == 2
+        assert await as_user(claims_for(user_b), visible_messages) == 0
 
         async def visible_to_other(session: AsyncSession) -> int:
             result = await session.execute(

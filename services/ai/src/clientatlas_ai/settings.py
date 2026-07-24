@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AnyHttpUrl, PostgresDsn
+from pydantic import AnyHttpUrl, PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     ollama_generation_model: str = "qwen2.5:7b"
     embedding_dimensions: int = 768
     llm_timeout_seconds: float = 90.0
+    gemini_api_key: SecretStr | None = None
+    gemini_model: str = "gemini-2.5-flash-lite"
 
 
 @lru_cache
