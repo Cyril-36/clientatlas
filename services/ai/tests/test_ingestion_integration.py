@@ -22,6 +22,7 @@ from clientatlas_ai.auth import VerifiedClaims
 from clientatlas_ai.documents import DOCX_MIME
 from clientatlas_ai.embeddings import DeterministicEmbeddingProvider
 from clientatlas_ai.ingestion import IngestionService
+from clientatlas_ai.retrieval import RetrievalService
 from clientatlas_ai.storage import LocalObjectStorage
 
 T = TypeVar("T")
@@ -159,6 +160,27 @@ async def test_docx_ingestion_retrieval_visibility_and_deletion(
         state, count = await as_user(claims_for(user_a), source_state)
         assert state == "ready"
         assert count == 1
+
+        retrieval = RetrievalService(DeterministicEmbeddingProvider())
+        evidence = await retrieval.retrieve(
+            claims=claims_for(user_a),
+            organization_id=organization_id,
+            workspace_id=workspace_id,
+            query="Who is the implementation owner?",
+            top_k=5,
+        )
+        assert len(evidence) == 1
+        assert evidence[0].source_id == queued.source_id
+        assert "Avery" in evidence[0].content
+
+        other_tenant_evidence = await retrieval.retrieve(
+            claims=claims_for(user_b),
+            organization_id=organization_id,
+            workspace_id=workspace_id,
+            query="Avery ' OR 1=1 --",
+            top_k=5,
+        )
+        assert other_tenant_evidence == ()
 
         async def visible_to_other(session: AsyncSession) -> int:
             result = await session.execute(
