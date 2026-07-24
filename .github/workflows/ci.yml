@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node-and-database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: clientatlas
+          POSTGRES_PASSWORD: test-migration-only
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d clientatlas"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Bootstrap local Auth compatibility
+        env:
+          PGPASSWORD: test-migration-only
+        run: >-
+          psql
+          --host 127.0.0.1
+          --username postgres
+          --dbname clientatlas
+          --file infra/local/postgres/00-auth-compat.sql
+
+      - name: Set isolated runtime password
+        env:
+          PGPASSWORD: test-migration-only
+        run: >-
+          psql
+          --host 127.0.0.1
+          --username postgres
+          --dbname clientatlas
+          --command "alter role clientatlas_runtime password 'test-runtime-only'"
+
+      - name: Apply migrations
+        env:
+          MIGRATION_DATABASE_URL: postgresql://postgres:test-migration-only@127.0.0.1:5432/clientatlas
+        run: npm run db:migrate
+
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+      - name: Run RLS integration tests
+        env:
+          TEST_MIGRATION_DATABASE_URL: postgresql://postgres:test-migration-only@127.0.0.1:5432/clientatlas
+          TEST_USER_DATABASE_URL: postgresql://clientatlas_runtime:test-runtime-only@127.0.0.1:5432/clientatlas
+        run: npm run test --workspace @clientatlas/database
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.8.8"
+          enable-cache: true
+
+      - run: uv sync --project services/ai --extra dev --locked
+
+      - name: Run Python database-contract integration test
+        env:
+          CLIENTATLAS_TEST_MIGRATION_DATABASE_URL: postgresql+asyncpg://postgres:test-migration-only@127.0.0.1:5432/clientatlas
+          CLIENTATLAS_TEST_USER_DATABASE_URL: postgresql+asyncpg://clientatlas_runtime:test-runtime-only@127.0.0.1:5432/clientatlas
+        run: >-
+          uv run --project services/ai pytest
+          services/ai/tests/test_database_integration.py
+
+      - run: npm run build
+
+      - name: Block critical production advisories
+        run: npm audit --omit=dev --audit-level=critical
+
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.8.8"
+          enable-cache: true
+
+      - run: uv sync --project services/ai --extra dev --locked
+      - run: uv run --project services/ai ruff check services/ai
+      - run: uv run --project services/ai ruff format --check services/ai
+      - run: uv run --project services/ai mypy services/ai/src
+      - run: uv run --project services/ai pytest services/ai/tests

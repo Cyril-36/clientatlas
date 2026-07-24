@@ -1,0 +1,33 @@
+{
+  "name": "clientatlas",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @clientatlas/product-api",
+    "check": "npm run lint && npm run typecheck && npm test",
+    "check:python": "npm run lint:python && npm run format:python && npm run typecheck:python && npm run test:python",
+    "db:migrate": "npm run db:migrate --workspace @clientatlas/database",
+    "dev:api": "npm run dev --workspace @clientatlas/product-api",
+    "dev:ai": "uv run --project services/ai uvicorn clientatlas_ai.main:app --reload --port 8000",
+    "format:python": "uv run --project services/ai ruff format --check services/ai",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:python": "uv run --project services/ai ruff check services/ai",
+    "test": "npm run test --workspaces --if-present",
+    "test:python": "uv run --project services/ai pytest services/ai/tests",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck:python": "uv run --project services/ai mypy services/ai/src"
+  },
+  "overrides": {
+    "next@16.2.11": {
+      "postcss": "8.5.22",
+      "sharp": "0.35.3"
+    }
+  }
+}

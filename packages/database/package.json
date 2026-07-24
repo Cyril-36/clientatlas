@@ -1,0 +1,28 @@
+{
+  "name": "@clientatlas/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "db:migrate": "node --import tsx src/migrate.ts",
+    "lint": "eslint src tests",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "0.45.2",
+    "postgres": "3.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "eslint": "9.39.5",
+    "tsx": "^4.20.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.65.0",
+    "vitest": "4.1.10"
+  }
+}

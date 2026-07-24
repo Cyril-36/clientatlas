@@ -1,0 +1,16 @@
+.git
+.github
+**/.DS_Store
+**/.env
+**/.env.*
+!**/.env.example
+**/.next
+**/.venv
+**/__pycache__
+**/coverage
+**/node_modules
+**/.pytest_cache
+**/.ruff_cache
+**/*.log
+tmp
+

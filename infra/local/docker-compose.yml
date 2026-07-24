@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: clientatlas
+      POSTGRES_PASSWORD: local-migration-only
+      POSTGRES_USER: postgres
+    ports:
+      - "55432:5432"
+    volumes:
+      - clientatlas_postgres_data:/var/lib/postgresql/data
+      - ./postgres/00-auth-compat.sql:/docker-entrypoint-initdb.d/00-auth-compat.sql:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U postgres -d clientatlas
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  clientatlas_postgres_data:
+
