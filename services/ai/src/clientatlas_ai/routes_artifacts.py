@@ -26,6 +26,7 @@ from clientatlas_ai.embeddings import (
     EmbeddingProvider,
     OllamaEmbeddingProvider,
 )
+from clientatlas_ai.rate_limit import expensive_operation_limiter
 from clientatlas_ai.retrieval import RetrievalService
 from clientatlas_ai.settings import get_settings
 
@@ -94,6 +95,7 @@ async def generate_artifact(
     claims: Annotated[VerifiedClaims, Depends(require_verified_claims)],
     service: Annotated[ArtifactService, Depends(get_artifact_service)],
 ) -> dict[str, object]:
+    await expensive_operation_limiter.check(claims.subject, "artifact_generate")
     result = await service.generate(
         claims=claims,
         organization_id=organization_id,

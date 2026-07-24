@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from clientatlas_ai.auth import VerifiedClaims
 from clientatlas_ai.database import with_user_database
 from clientatlas_ai.embeddings import EmbeddingProvider
+from clientatlas_ai.telemetry import RETRIEVAL_CANDIDATES, tracer
 
 RRF_K = 60
 MAX_CANDIDATES_PER_PATH = 40
@@ -179,16 +180,21 @@ class RetrievalService:
         query: str,
         top_k: int,
     ) -> tuple[EvidenceChunk, ...]:
-        vectors = await self._embeddings.embed([query])
+        with tracer.start_as_current_span("retrieval.hybrid") as span:
+            vectors = await self._embeddings.embed([query])
 
-        async def run(session: AsyncSession) -> tuple[EvidenceChunk, ...]:
-            return await hybrid_retrieve(
-                session,
-                organization_id=organization_id,
-                workspace_id=workspace_id,
-                query=query,
-                query_embedding=vectors[0],
-                top_k=top_k,
-            )
+            async def run(session: AsyncSession) -> tuple[EvidenceChunk, ...]:
+                return await hybrid_retrieve(
+                    session,
+                    organization_id=organization_id,
+                    workspace_id=workspace_id,
+                    query=query,
+                    query_embedding=vectors[0],
+                    top_k=top_k,
+                )
 
-        return await with_user_database(claims, run)
+            result = await with_user_database(claims, run)
+            span.set_attribute("retrieval.candidate_count", len(result))
+            span.set_attribute("retrieval.top_k", top_k)
+            RETRIEVAL_CANDIDATES.observe(len(result))
+            return result

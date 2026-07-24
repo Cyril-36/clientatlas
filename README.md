@@ -5,13 +5,13 @@ consultancies, implementation teams, and customer-success teams. It turns
 client documents into cited answers, editable onboarding briefs, readiness
 reports, and action plans.
 
-This repository is currently in the architecture and product-definition phase.
-The V1 design is frozen around a zero-cash-cost constraint.
+The V1 backend is implemented around a zero-cash-cost constraint. The frontend
+is intentionally excluded for a separate design/build workflow.
 
 ## V1 architecture
 
 ```text
-Next.js web application and Node.js route handlers
+Headless Next.js product API using Node.js route handlers
         |
         +-- Supabase Auth
         |
@@ -71,8 +71,24 @@ through a recorded authenticated flow.
 - Deterministic cross-tenant and pooled-connection regression tests
 - FastAPI service foundation with strict settings, JWT verification, and health
 - Local pgvector Docker service
+- PDF/DOCX ingestion with bounded parsing, chunking, re-indexing, and deletion
+- PostgreSQL full-text plus pgvector hybrid retrieval with RRF
+- Streamed plain-text answers with validated citations and abstention
+- Ollama-first generation and synthetic-only Gemini routing
+- Editable evidence-linked onboarding artifacts with immutable history
+- PKCE Google Drive `drive.file` connector with private encrypted credentials
+- Thirty-case evaluation suite and measured retrieval report
+- OpenTelemetry, Prometheus, Grafana, architecture, and secret-scanning gates
 
 No application frontend has been created.
+
+Backend handoff:
+
+- [API and frontend contract](docs/API.md)
+- [Exact implementation status](docs/IMPLEMENTATION_STATUS.md)
+- [Evaluation results and method](docs/EVALUATION.md)
+- [Local runbook](docs/runbooks/LOCAL_DEVELOPMENT.md)
+- Generated OpenAPI: `packages/contracts/openapi/ai-service.json`
 
 ## Local backend setup
 
@@ -100,16 +116,9 @@ npm run dev:api
 npm run dev:ai
 ```
 
-Implemented routes:
-
-| Service | Method and path | Purpose |
-| --- | --- | --- |
-| Product API | `GET /api/health` | Unauthenticated liveness |
-| Product API | `GET /api/v1/organizations` | List caller organizations |
-| Product API | `POST /api/v1/organizations` | Create organization plus owner |
-| Product API | `GET /api/v1/organizations/:id/workspaces` | List workspaces |
-| Product API | `POST /api/v1/organizations/:id/workspaces` | Create workspace |
-| AI service | `GET /health` | Unauthenticated liveness |
+The complete route, request, response, SSE, and frontend-security contracts are
+documented in [API and frontend contract](docs/API.md). Liveness endpoints are
+`GET /api/health` for the product API and `GET /health` for the AI service.
 
 Run verification:
 

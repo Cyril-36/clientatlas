@@ -20,6 +20,7 @@ from clientatlas_ai.ingestion_repository import (
     set_ingestion_state,
 )
 from clientatlas_ai.storage import LocalObjectStorage, generated_object_path
+from clientatlas_ai.telemetry import INGESTION_FAILURES, tracer
 
 
 @dataclass(frozen=True, slots=True)
@@ -123,62 +124,66 @@ class IngestionService:
                 source_id=source_id,
             )
 
-        source = await with_user_database(claims, lookup)
-        if source is None:
-            raise SafeServiceError("source_not_found", status_code=404)
+        with tracer.start_as_current_span("ingestion.process") as span:
+            source = await with_user_database(claims, lookup)
+            if source is None:
+                raise SafeServiceError("source_not_found", status_code=404)
 
-        try:
-            await self._state(claims, source, "parsing")
-            content = await self._storage.get(source.object_path)
-            suffix = source.object_path.rsplit(".", maxsplit=1)[-1]
-            mime = (
-                "application/pdf"
-                if suffix == "pdf"
-                else "application/vnd.openxmlformats-officedocument."
-                "wordprocessingml.document"
-            )
-            parsed = parse_document(mime, content)
-            await self._state(claims, source, "chunking")
-            chunks = chunk_blocks(parsed.blocks)
-            if not chunks:
-                raise SafeServiceError("no_extractable_text")
-            await self._state(claims, source, "embedding")
-            embeddings = await self._embeddings.embed(
-                [chunk.content for chunk in chunks]
-            )
-
-            async def activate(session: object) -> None:
-                from sqlalchemy.ext.asyncio import AsyncSession
-
-                assert isinstance(session, AsyncSession)
-                await activate_chunks(
-                    session,
-                    source_id=source.source_id,
-                    version_id=source.version_id,
-                    organization_id=organization_id,
-                    workspace_id=workspace_id,
-                    page_count=parsed.page_count,
-                    chunks=chunks,
-                    embeddings=embeddings,
+            try:
+                await self._state(claims, source, "parsing")
+                content = await self._storage.get(source.object_path)
+                suffix = source.object_path.rsplit(".", maxsplit=1)[-1]
+                mime = (
+                    "application/pdf"
+                    if suffix == "pdf"
+                    else "application/vnd.openxmlformats-officedocument."
+                    "wordprocessingml.document"
+                )
+                parsed = parse_document(mime, content)
+                await self._state(claims, source, "chunking")
+                chunks = chunk_blocks(parsed.blocks)
+                if not chunks:
+                    raise SafeServiceError("no_extractable_text")
+                await self._state(claims, source, "embedding")
+                embeddings = await self._embeddings.embed(
+                    [chunk.content for chunk in chunks]
                 )
 
-            await with_user_database(claims, activate)
-        except SafeServiceError as error:
-            safe_error_code = error.code
+                async def activate(session: object) -> None:
+                    from sqlalchemy.ext.asyncio import AsyncSession
 
-            async def fail(session: object) -> None:
-                from sqlalchemy.ext.asyncio import AsyncSession
+                    assert isinstance(session, AsyncSession)
+                    await activate_chunks(
+                        session,
+                        source_id=source.source_id,
+                        version_id=source.version_id,
+                        organization_id=organization_id,
+                        workspace_id=workspace_id,
+                        page_count=parsed.page_count,
+                        chunks=chunks,
+                        embeddings=embeddings,
+                    )
 
-                assert isinstance(session, AsyncSession)
-                await mark_ingestion_failed(
-                    session,
-                    source_id=source.source_id,
-                    version_id=source.version_id,
-                    safe_error_code=safe_error_code,
-                )
+                await with_user_database(claims, activate)
+                span.set_attribute("ingestion.chunk_count", len(chunks))
+                span.set_attribute("ingestion.provider", self._embeddings.name)
+            except SafeServiceError as error:
+                safe_error_code = error.code
+                INGESTION_FAILURES.labels(code=safe_error_code).inc()
 
-            await with_user_database(claims, fail)
-            raise
+                async def fail(session: object) -> None:
+                    from sqlalchemy.ext.asyncio import AsyncSession
+
+                    assert isinstance(session, AsyncSession)
+                    await mark_ingestion_failed(
+                        session,
+                        source_id=source.source_id,
+                        version_id=source.version_id,
+                        safe_error_code=safe_error_code,
+                    )
+
+                await with_user_database(claims, fail)
+                raise
 
     async def _state(
         self,

@@ -84,15 +84,23 @@ jobs:
 
       - run: uv sync --project services/ai --extra dev --locked
 
-      - name: Run Python database-contract integration test
+      - name: Run Python live security and ingestion integration tests
         env:
           CLIENTATLAS_TEST_MIGRATION_DATABASE_URL: postgresql+asyncpg://postgres:test-migration-only@127.0.0.1:5432/clientatlas
           CLIENTATLAS_TEST_USER_DATABASE_URL: postgresql+asyncpg://clientatlas_runtime:test-runtime-only@127.0.0.1:5432/clientatlas
-        run: >-
-          uv run --project services/ai pytest
-          services/ai/tests/test_database_integration.py
+        run: uv run --project services/ai pytest -m integration
 
       - run: npm run build
+
+      - name: Verify generated AI contract is current
+        run: |
+          npm run contracts:ai
+          git diff --exit-code packages/contracts/openapi/ai-service.json
+
+      - name: Build production images
+        run: |
+          docker build -f apps/product-api/Dockerfile -t clientatlas-product-api:ci .
+          docker build -f services/ai/Dockerfile -t clientatlas-ai:ci .
 
       - name: Block critical production advisories
         run: npm audit --omit=dev --audit-level=critical

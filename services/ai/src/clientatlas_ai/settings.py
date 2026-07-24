@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     google_oauth_client_secret: SecretStr | None = None
     google_oauth_redirect_uri: AnyHttpUrl | None = None
     token_encryption_key: SecretStr | None = None
+    otlp_endpoint: AnyHttpUrl | None = None
+    telemetry_enabled: bool = True
 
 
 @lru_cache

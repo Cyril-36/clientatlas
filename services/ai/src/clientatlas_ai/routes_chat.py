@@ -23,6 +23,7 @@ from clientatlas_ai.generation import (
     GenerationProvider,
     OllamaGenerationProvider,
 )
+from clientatlas_ai.rate_limit import expensive_operation_limiter
 from clientatlas_ai.retrieval import RetrievalService
 from clientatlas_ai.settings import get_settings
 
@@ -125,6 +126,7 @@ async def stream_answer(
     claims: Annotated[VerifiedClaims, Depends(require_verified_claims)],
     service: Annotated[AnswerService, Depends(get_answer_service)],
 ) -> StreamingResponse:
+    await expensive_operation_limiter.check(claims.subject, "chat")
     return StreamingResponse(
         answer_events(
             service,

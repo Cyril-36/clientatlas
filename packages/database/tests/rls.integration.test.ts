@@ -183,6 +183,17 @@ suite("identity and tenancy RLS", () => {
       expect(table.relforcerowsecurity).toBe(true);
       expect(table.owner).not.toBe("clientatlas_runtime");
     }
+
+    const auditRows = await asUser(userA, (transaction) =>
+      transaction<{ event_type: string }[]>`
+        select event_type
+        from app.audit_events
+        where organization_id = ${organizationA}
+      `
+    );
+    expect(auditRows.map((row) => row.event_type)).toContain(
+      "workspace.created"
+    );
   });
 
   it("enforces the editor and viewer authorization matrix", async () => {

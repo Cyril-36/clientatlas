@@ -1,0 +1,280 @@
+{
+  "configuration": {
+    "chunker": "word-window-700-overlap-80",
+    "embedding": "sha256-token-hash-v1",
+    "fusion": "rrf-k-60"
+  },
+  "datasetVersion": "1.0.0",
+  "metrics": {
+    "caseCount": 24,
+    "meanNdcg": 0.8835541379407056,
+    "meanRecallAtK": 1.0,
+    "mrr": 0.8472222222222222
+  },
+  "results": [
+    {
+      "caseId": "q001",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-security.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q002",
+      "ndcg": 0.5,
+      "recallAtK": 1.0,
+      "reciprocalRank": 0.3333333333333333,
+      "retrievedSources": [
+        "northstar-security.docx",
+        "northstar-plan.docx",
+        "northstar-brief.docx"
+      ]
+    },
+    {
+      "caseId": "q003",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-plan.docx",
+        "northstar-security.docx"
+      ]
+    },
+    {
+      "caseId": "q004",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-plan.docx",
+        "northstar-security.docx"
+      ]
+    },
+    {
+      "caseId": "q005",
+      "ndcg": 0.6309297535714575,
+      "recallAtK": 1.0,
+      "reciprocalRank": 0.5,
+      "retrievedSources": [
+        "northstar-security.docx",
+        "northstar-brief.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q006",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-security.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q007",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-security.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q008",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-plan.docx",
+        "northstar-security.docx"
+      ]
+    },
+    {
+      "caseId": "q009",
+      "ndcg": 0.6309297535714575,
+      "recallAtK": 1.0,
+      "reciprocalRank": 0.5,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-security.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q010",
+      "ndcg": 0.6309297535714575,
+      "recallAtK": 1.0,
+      "reciprocalRank": 0.5,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-security.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q011",
+      "ndcg": 0.6309297535714575,
+      "recallAtK": 1.0,
+      "reciprocalRank": 0.5,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-security.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q012",
+      "ndcg": 0.6309297535714575,
+      "recallAtK": 1.0,
+      "reciprocalRank": 0.5,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-security.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q013",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-security.docx",
+        "northstar-plan.docx",
+        "northstar-brief.docx"
+      ]
+    },
+    {
+      "caseId": "q014",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-plan.docx",
+        "northstar-security.docx",
+        "northstar-brief.docx"
+      ]
+    },
+    {
+      "caseId": "q015",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-plan.docx",
+        "northstar-security.docx",
+        "northstar-brief.docx"
+      ]
+    },
+    {
+      "caseId": "q016",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-plan.docx",
+        "northstar-security.docx",
+        "northstar-brief.docx"
+      ]
+    },
+    {
+      "caseId": "q017",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-plan.docx",
+        "northstar-security.docx",
+        "northstar-brief.docx"
+      ]
+    },
+    {
+      "caseId": "q018",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-plan.docx",
+        "northstar-security.docx",
+        "northstar-brief.docx"
+      ]
+    },
+    {
+      "caseId": "q019",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-plan.docx",
+        "northstar-security.docx",
+        "northstar-brief.docx"
+      ]
+    },
+    {
+      "caseId": "q020",
+      "ndcg": 0.9197207891481876,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-security.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q026",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-security.docx",
+        "northstar-brief.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q028",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-security.docx",
+        "northstar-brief.docx",
+        "northstar-plan.docx"
+      ]
+    },
+    {
+      "caseId": "q029",
+      "ndcg": 1.0,
+      "recallAtK": 1.0,
+      "reciprocalRank": 1.0,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-plan.docx",
+        "northstar-security.docx"
+      ]
+    },
+    {
+      "caseId": "q030",
+      "ndcg": 0.6309297535714575,
+      "recallAtK": 1.0,
+      "reciprocalRank": 0.5,
+      "retrievedSources": [
+        "northstar-brief.docx",
+        "northstar-security.docx",
+        "northstar-plan.docx"
+      ]
+    }
+  ]
+}

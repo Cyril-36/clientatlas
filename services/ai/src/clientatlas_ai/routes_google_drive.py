@@ -16,6 +16,7 @@ from clientatlas_ai.google_drive import (
     TokenCipher,
 )
 from clientatlas_ai.ingestion import IngestionService
+from clientatlas_ai.rate_limit import expensive_operation_limiter
 from clientatlas_ai.routes_sources import _process_safely
 from clientatlas_ai.settings import get_settings
 
@@ -119,6 +120,7 @@ async def import_google_drive_file(
     connector: Annotated[GoogleDriveConnector, Depends(get_google_drive_connector)],
     ingestion: Annotated[IngestionService, Depends(get_ingestion_service)],
 ) -> dict[str, object]:
+    await expensive_operation_limiter.check(claims.subject, "drive_import")
     settings = get_settings()
     drive_file = await connector.download_selected_file(
         claims=claims,

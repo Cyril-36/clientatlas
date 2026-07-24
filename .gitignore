@@ -1,4 +1,6 @@
 node_modules/
+.clientatlas/
+*.swp
 .next/
 dist/
 coverage/
@@ -21,4 +23,3 @@ __pycache__/
 .vscode/
 
 tmp/
-

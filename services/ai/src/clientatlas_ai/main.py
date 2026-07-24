@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from jwt import InvalidTokenError
@@ -8,6 +10,7 @@ from clientatlas_ai.routes_chat import router as chat_router
 from clientatlas_ai.routes_google_drive import router as google_drive_router
 from clientatlas_ai.routes_retrieval import router as retrieval_router
 from clientatlas_ai.routes_sources import router as sources_router
+from clientatlas_ai.telemetry import configure_telemetry
 
 app = FastAPI(
     title="ClientAtlas AI Service",
@@ -21,6 +24,11 @@ app.include_router(retrieval_router)
 app.include_router(chat_router)
 app.include_router(artifacts_router)
 app.include_router(google_drive_router)
+configure_telemetry(
+    app,
+    enabled=os.getenv("CLIENTATLAS_TELEMETRY_ENABLED", "true").lower() == "true",
+    otlp_endpoint=os.getenv("CLIENTATLAS_OTLP_ENDPOINT"),
+)
 
 
 @app.exception_handler(InvalidTokenError)

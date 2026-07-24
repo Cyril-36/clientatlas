@@ -14,6 +14,7 @@ from clientatlas_ai.auth import VerifiedClaims
 from clientatlas_ai.database import with_user_database
 from clientatlas_ai.errors import SafeServiceError
 from clientatlas_ai.retrieval import EvidenceChunk, RetrievalService
+from clientatlas_ai.telemetry import GENERATION_REQUESTS, tracer
 
 
 class GeneratedAnswer(BaseModel):
@@ -356,13 +357,14 @@ class AnswerService:
         conversation_id: UUID | None,
         top_k: int = 8,
     ) -> ValidatedAnswer:
-        evidence = await self._retrieval.retrieve(
-            claims=claims,
-            organization_id=organization_id,
-            workspace_id=workspace_id,
-            query=question,
-            top_k=top_k,
-        )
+        with tracer.start_as_current_span("generation.retrieve"):
+            evidence = await self._retrieval.retrieve(
+                claims=claims,
+                organization_id=organization_id,
+                workspace_id=workspace_id,
+                query=question,
+                top_k=top_k,
+            )
 
         async def get_mode(session: AsyncSession) -> str:
             return await workspace_privacy_mode(
@@ -385,10 +387,12 @@ class AnswerService:
             citations: tuple[EvidenceChunk, ...] = ()
         else:
             prompt = build_grounded_prompt(question, evidence)
-            parsed, citations = validate_generated_answer(
-                await provider.generate(prompt),
-                evidence,
-            )
+            with tracer.start_as_current_span("generation.provider") as provider_span:
+                provider_span.set_attribute("generation.provider", provider.name)
+                parsed, citations = validate_generated_answer(
+                    await provider.generate(prompt),
+                    evidence,
+                )
 
         async def persist(session: AsyncSession) -> tuple[UUID, UUID]:
             return await persist_validated_exchange(
@@ -407,6 +411,12 @@ class AnswerService:
             claims,
             persist,
         )
+        outcome = "abstained" if parsed.abstained else "answered"
+        GENERATION_REQUESTS.labels(
+            provider=provider.name,
+            model=provider.model,
+            outcome=outcome,
+        ).inc()
         return ValidatedAnswer(
             answer=parsed.answer,
             abstained=parsed.abstained,
