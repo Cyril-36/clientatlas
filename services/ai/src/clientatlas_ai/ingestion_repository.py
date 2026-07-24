@@ -381,6 +381,16 @@ async def delete_source_records(
         {"source_id": source_id},
     )
     await session.execute(
+        text(
+            """
+            update app.artifact_evidence
+            set state = 'missing', chunk_id = null
+            where source_id = :source_id and state = 'active'
+            """
+        ),
+        {"source_id": source_id},
+    )
+    await session.execute(
         text("delete from app.document_versions where source_id = :source_id"),
         {"source_id": source_id},
     )

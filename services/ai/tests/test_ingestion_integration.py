@@ -18,6 +18,10 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from clientatlas_ai import database
+from clientatlas_ai.artifacts import (
+    ArtifactService,
+    DeterministicArtifactProvider,
+)
 from clientatlas_ai.auth import VerifiedClaims
 from clientatlas_ai.documents import DOCX_MIME
 from clientatlas_ai.embeddings import DeterministicEmbeddingProvider
@@ -214,6 +218,29 @@ async def test_docx_ingestion_retrieval_visibility_and_deletion(
         assert await as_user(claims_for(user_a), visible_messages) == 2
         assert await as_user(claims_for(user_b), visible_messages) == 0
 
+        artifacts = ArtifactService(
+            retrieval=retrieval,
+            provider=DeterministicArtifactProvider(),
+        )
+        artifact = await artifacts.generate(
+            claims=claims_for(user_a),
+            organization_id=organization_id,
+            workspace_id=workspace_id,
+            artifact_type="readiness_report",
+            title="Onboarding readiness",
+        )
+        edited = await artifacts.save_edited_version(
+            claims=claims_for(user_a),
+            organization_id=organization_id,
+            workspace_id=workspace_id,
+            artifact_id=artifact.artifact_id,
+            artifact_type="readiness_report",
+            content_payload=artifact.content,
+            status="reviewed",
+        )
+        assert edited.version_number == 2
+        assert edited.status == "reviewed"
+
         async def visible_to_other(session: AsyncSession) -> int:
             result = await session.execute(
                 text("select count(*) from app.sources where id = :source_id"),
@@ -230,6 +257,29 @@ async def test_docx_ingestion_retrieval_visibility_and_deletion(
         )
         remaining = await to_thread.run_sync(lambda: list(tmp_path.rglob("*.docx")))
         assert not remaining
+
+        async def evidence_state(session: AsyncSession) -> tuple[int, int]:
+            result = await session.execute(
+                text(
+                    """
+                    select
+                      count(*) filter (where state = 'missing'),
+                      count(distinct artifact_version_id)
+                    from app.artifact_evidence
+                    where artifact_id = :artifact_id
+                    """
+                ),
+                {"artifact_id": artifact.artifact_id},
+            )
+            row = result.one()
+            return int(row[0]), int(row[1])
+
+        missing_count, version_count = await as_user(
+            claims_for(user_a),
+            evidence_state,
+        )
+        assert missing_count == 2
+        assert version_count == 2
     finally:
         async with migration_engine.begin() as connection:
             if organization_id is not None:
