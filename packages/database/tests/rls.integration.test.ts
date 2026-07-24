@@ -13,6 +13,7 @@ suite("identity and tenancy RLS", () => {
   let runtime: Sql;
   const userA = randomUUID();
   const userB = randomUUID();
+  const userC = randomUUID();
   let organizationA: string;
   let workspaceA: string;
 
@@ -42,7 +43,8 @@ suite("identity and tenancy RLS", () => {
       insert into auth.users (id, email)
       values
         (${userA}, ${`user-a-${userA}@example.test`}),
-        (${userB}, ${`user-b-${userB}@example.test`})
+        (${userB}, ${`user-b-${userB}@example.test`}),
+        (${userC}, ${`user-c-${userC}@example.test`})
     `;
 
     organizationA = await asUser(userA, async (transaction) => {
@@ -78,7 +80,7 @@ suite("identity and tenancy RLS", () => {
   afterAll(async () => {
     if (admin) {
       await admin`delete from app.organizations where id = ${organizationA}`;
-      await admin`delete from auth.users where id in (${userA}, ${userB})`;
+      await admin`delete from auth.users where id in (${userA}, ${userB}, ${userC})`;
       await admin.end();
     }
     if (runtime) {
@@ -181,5 +183,77 @@ suite("identity and tenancy RLS", () => {
       expect(table.relforcerowsecurity).toBe(true);
       expect(table.owner).not.toBe("clientatlas_runtime");
     }
+  });
+
+  it("enforces the editor and viewer authorization matrix", async () => {
+    await asUser(userA, (transaction) =>
+      transaction`
+        select app.set_organization_membership(
+          ${organizationA},
+          ${userB},
+          'editor'::app.organization_role
+        )
+      `
+    );
+    await asUser(userA, (transaction) =>
+      transaction`
+        select app.set_organization_membership(
+          ${organizationA},
+          ${userC},
+          'viewer'::app.organization_role
+        )
+      `
+    );
+
+    const editorRows = await asUser(userB, (transaction) =>
+      transaction<{ id: string }[]>`
+        insert into app.workspaces (
+          organization_id,
+          name,
+          privacy_mode,
+          created_by
+        )
+        values (
+          ${organizationA},
+          'Editor workspace',
+          'local_confidential',
+          ${userB}
+        )
+        returning id
+      `
+    );
+    expect(editorRows).toHaveLength(1);
+
+    await expect(
+      asUser(userC, (transaction) =>
+        transaction`
+          insert into app.workspaces (
+            organization_id,
+            name,
+            privacy_mode,
+            created_by
+          )
+          values (
+            ${organizationA},
+            'Viewer workspace',
+            'local_confidential',
+            ${userC}
+          )
+        `
+      )
+    ).rejects.toBeDefined();
+  });
+
+  it("prevents deleting the last owner", async () => {
+    await expect(
+      asUser(userA, (transaction) =>
+        transaction`
+          select app.remove_organization_membership(
+            ${organizationA},
+            ${userA}
+          )
+        `
+      )
+    ).rejects.toBeDefined();
   });
 });
