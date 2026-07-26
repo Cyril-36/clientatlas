@@ -166,6 +166,26 @@ suite("identity and tenancy RLS", () => {
       rolsuper: false
     });
 
+    const extensionPrivileges = await admin<
+      { can_create: boolean; can_use: boolean }[]
+    >`
+      select
+        has_schema_privilege(
+          'authenticated',
+          'extensions',
+          'CREATE'
+        ) as can_create,
+        has_schema_privilege(
+          'authenticated',
+          'extensions',
+          'USAGE'
+        ) as can_use
+    `;
+    expect(extensionPrivileges[0]).toEqual({
+      can_create: false,
+      can_use: true
+    });
+
     const tables = await admin<
       { owner: string; relforcerowsecurity: boolean; relname: string }[]
     >`
