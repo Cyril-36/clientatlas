@@ -246,7 +246,7 @@ async def activate_chunks(
         values (
           :organization_id, :workspace_id, :source_id, :version_id,
           :ordinal, :content, :token_count, cast(:locator as jsonb),
-          cast(:embedding as vector)
+          cast(:embedding as extensions.vector)
         )
         """
     )

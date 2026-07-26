@@ -99,11 +99,13 @@ async def hybrid_retrieve(
                 id,
                 row_number() over (
                   order by
-                    embedding <=> cast(:query_embedding as vector),
+                    embedding <=> cast(:query_embedding as extensions.vector),
                     id
                 )::integer as rank
               from eligible
-              order by embedding <=> cast(:query_embedding as vector), id
+              order by
+                embedding <=> cast(:query_embedding as extensions.vector),
+                id
               limit :candidate_limit
             ),
             candidates as (
