@@ -5,9 +5,8 @@ import math
 from collections.abc import Sequence
 from typing import Protocol
 
-import httpx
-
 from clientatlas_ai.errors import SafeServiceError
+from clientatlas_ai.local_models import encode_sentences
 
 
 class EmbeddingProvider(Protocol):
@@ -20,23 +19,23 @@ class EmbeddingProvider(Protocol):
     async def embed(self, texts: Sequence[str]) -> list[list[float]]: ...
 
 
-class OllamaEmbeddingProvider:
+class HuggingFaceEmbeddingProvider:
     def __init__(
         self,
         *,
-        base_url: str,
         model: str,
+        device: str,
         dimensions: int,
         timeout_seconds: float,
     ) -> None:
-        self._base_url = base_url.rstrip("/")
         self._model = model
+        self._device = device
         self._dimensions = dimensions
         self._timeout = timeout_seconds
 
     @property
     def name(self) -> str:
-        return "ollama"
+        return "huggingface"
 
     @property
     def model(self) -> str:
@@ -46,14 +45,15 @@ class OllamaEmbeddingProvider:
         if not texts:
             return []
         try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.post(
-                    f"{self._base_url}/api/embed",
-                    json={"input": list(texts), "model": self._model},
-                )
-                response.raise_for_status()
-                raw = response.json().get("embeddings")
-        except (httpx.HTTPError, ValueError) as error:
+            raw = await encode_sentences(
+                texts,
+                model=self._model,
+                device=self._device,
+                timeout_seconds=self._timeout,
+            )
+            if hasattr(raw, "tolist"):
+                raw = raw.tolist()
+        except (ImportError, OSError, RuntimeError, TimeoutError, ValueError) as error:
             raise SafeServiceError(
                 "embedding_provider_unavailable",
                 status_code=503,
@@ -64,7 +64,7 @@ class OllamaEmbeddingProvider:
 class DeterministicEmbeddingProvider:
     """Dependency-free provider for tests and synthetic seeded demonstrations."""
 
-    def __init__(self, dimensions: int = 768) -> None:
+    def __init__(self, dimensions: int = 384) -> None:
         self._dimensions = dimensions
 
     @property

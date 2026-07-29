@@ -1389,7 +1389,7 @@ function SettingsScreen() {
               <span>
                 <strong>Local confidential</strong>
                 <small>
-                  Routes model work to the configured local Ollama service.
+                  Runs lightweight downloaded models on your own machine.
                 </small>
               </span>
             </label>
@@ -1748,7 +1748,9 @@ function OnboardingScreen({
                   />
                   <span>
                     <strong>Local confidential</strong>
-                    <small>Use local Ollama for confidential documents.</small>
+                    <small>
+                      Use lightweight local models for confidential documents.
+                    </small>
                   </span>
                 </label>
                 <label className="choice-row">

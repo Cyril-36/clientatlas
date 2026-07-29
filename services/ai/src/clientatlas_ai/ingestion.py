@@ -162,6 +162,8 @@ class IngestionService:
                         page_count=parsed.page_count,
                         chunks=chunks,
                         embeddings=embeddings,
+                        embedding_provider=self._embeddings.name,
+                        embedding_model=self._embeddings.model,
                     )
 
                 await with_user_database(claims, activate)

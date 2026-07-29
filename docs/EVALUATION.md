@@ -14,12 +14,15 @@ adversarial or contradiction cases that declare expected sources.
 | Mean nDCG | 0.884 |
 
 The deterministic hash embedding is a reproducible test baseline, not the
-recommended production model. Rerun the gates with configured Ollama embedding
-and generation models before making model-quality claims.
+recommended production model. Rerun the gates with
+`sentence-transformers/all-MiniLM-L6-v2` and `google/flan-t5-small` before
+making model-quality claims.
 
 Citation-precision and abstention metrics are implemented, but no generation
-score is claimed until an Ollama run has been repeated and reviewed. Security
-invariants remain deterministic and do not depend on model output.
+score is claimed until a lightweight Hugging Face run has been repeated and
+reviewed. Security invariants remain deterministic and do not depend on model
+output. Citation IDs and artifact structure are selected by application code
+from the retrieved allowlist rather than trusted to the small generator.
 
 Any change to the corpus, questions, chunker, embedding provider, RRF constant,
 prompt, model, or citation validator requires a new report.

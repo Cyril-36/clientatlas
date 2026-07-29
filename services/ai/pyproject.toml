@@ -29,6 +29,12 @@ dev = [
   "pytest-asyncio>=1.1,<2",
   "ruff>=0.12,<1"
 ]
+local-models = [
+  "sentence-transformers>=3.4,<6",
+  "sentencepiece>=0.2,<1",
+  "torch>=2.5,<3",
+  "transformers>=4.48,<5"
+]
 
 [build-system]
 requires = ["hatchling>=1.27"]

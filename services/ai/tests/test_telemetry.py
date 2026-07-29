@@ -20,6 +20,6 @@ def test_safe_span_attributes_drop_structured_payloads() -> None:
     assert safe_span_attributes(
         candidate_count=8,
         document_body={"secret": "text"},
-        provider="ollama",
+        provider="huggingface",
         token=["secret"],
-    ) == {"candidate_count": 8, "provider": "ollama"}
+    ) == {"candidate_count": 8, "provider": "huggingface"}

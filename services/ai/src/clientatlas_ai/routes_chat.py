@@ -14,14 +14,14 @@ from clientatlas_ai.auth import VerifiedClaims, require_verified_claims
 from clientatlas_ai.embeddings import (
     DeterministicEmbeddingProvider,
     EmbeddingProvider,
-    OllamaEmbeddingProvider,
+    HuggingFaceEmbeddingProvider,
 )
 from clientatlas_ai.generation import (
     AnswerService,
     DeterministicGenerationProvider,
     GeminiGenerationProvider,
     GenerationProvider,
-    OllamaGenerationProvider,
+    HuggingFaceGenerationProvider,
 )
 from clientatlas_ai.rate_limit import expensive_operation_limiter
 from clientatlas_ai.retrieval import RetrievalService
@@ -55,15 +55,17 @@ def get_answer_service() -> AnswerService:
         embeddings = DeterministicEmbeddingProvider(settings.embedding_dimensions)
         local = DeterministicGenerationProvider()
     else:
-        embeddings = OllamaEmbeddingProvider(
-            base_url=str(settings.ollama_base_url),
-            model=settings.ollama_embedding_model,
+        embeddings = HuggingFaceEmbeddingProvider(
+            model=settings.huggingface_embedding_model,
+            device=settings.huggingface_embedding_device,
             dimensions=settings.embedding_dimensions,
             timeout_seconds=settings.llm_timeout_seconds,
         )
-        local = OllamaGenerationProvider(
-            base_url=str(settings.ollama_base_url),
-            model=settings.ollama_generation_model,
+        local = HuggingFaceGenerationProvider(
+            model=settings.huggingface_generation_model,
+            device=settings.huggingface_generation_device,
+            max_input_characters=settings.local_model_max_input_characters,
+            max_new_tokens=settings.local_model_max_new_tokens,
             timeout_seconds=settings.llm_timeout_seconds,
         )
     synthetic = None

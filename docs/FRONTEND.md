@@ -33,7 +33,8 @@ Loading and empty-state variants are available at `/overview/loading`,
 - uploads, connector changes, administrative actions, generation, and deletion
   are disabled;
 - chat uses a deterministic local demonstration response; and
-- no Supabase, FastAPI, Gemini, or Ollama call is made from the demo question.
+- no Supabase, FastAPI, Gemini, or local-model call is made from the demo
+  question.
 
 ## Authenticated mode
 

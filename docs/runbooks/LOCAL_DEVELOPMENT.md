@@ -1,13 +1,12 @@
 # Local Development Runbook
 
-Prerequisites are Node.js 24, npm, Python 3.11–3.13, uv, Docker Desktop, and
-Ollama for real local embeddings and generation.
+Prerequisites are Node.js 24, npm, Python 3.11–3.13, uv, and Docker Desktop.
 
 ```bash
 docker compose -f infra/local/docker-compose.yml up -d postgres
 MIGRATION_DATABASE_URL=postgresql://postgres:local-migration-only@127.0.0.1:55432/clientatlas npm run db:migrate
 npm ci
-uv sync --project services/ai --extra dev --locked
+uv sync --project services/ai --extra dev --extra local-models --locked
 npm run check
 npm run check:python
 npm run build
@@ -20,12 +19,20 @@ npm run dev:api
 npm run dev:ai
 ```
 
-For local models:
+The first authenticated request downloads `all-MiniLM-L6-v2` and
+`flan-t5-small` into the normal Hugging Face cache. The public synthetic mode
+does not import or download the optional local-model dependencies.
+
+Verify the downloaded models using fictional input:
 
 ```bash
-ollama pull nomic-embed-text
-ollama pull qwen2.5:7b
+uv run --project services/ai --extra local-models python scripts/verify_local_models.py
 ```
+
+After migration `0014_huggingface_minilm_embeddings.sql`, re-index every
+retained source. The migration deliberately invalidates old 768-dimensional
+derived chunks because embeddings from different model spaces cannot be
+converted truthfully.
 
 Leave `CLIENTATLAS_GEMINI_API_KEY` unset for confidential operation.
 

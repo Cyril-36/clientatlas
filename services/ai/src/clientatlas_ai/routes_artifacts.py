@@ -15,7 +15,7 @@ from clientatlas_ai.artifacts import (
     ArtifactStatus,
     ArtifactType,
     DeterministicArtifactProvider,
-    OllamaArtifactProvider,
+    HuggingFaceArtifactProvider,
     list_artifact_versions,
     list_artifacts,
 )
@@ -24,7 +24,7 @@ from clientatlas_ai.database import with_user_database
 from clientatlas_ai.embeddings import (
     DeterministicEmbeddingProvider,
     EmbeddingProvider,
-    OllamaEmbeddingProvider,
+    HuggingFaceEmbeddingProvider,
 )
 from clientatlas_ai.rate_limit import expensive_operation_limiter
 from clientatlas_ai.retrieval import RetrievalService
@@ -70,15 +70,17 @@ def get_artifact_service() -> ArtifactService:
         embeddings = DeterministicEmbeddingProvider(settings.embedding_dimensions)
         provider = DeterministicArtifactProvider()
     else:
-        embeddings = OllamaEmbeddingProvider(
-            base_url=str(settings.ollama_base_url),
-            model=settings.ollama_embedding_model,
+        embeddings = HuggingFaceEmbeddingProvider(
+            model=settings.huggingface_embedding_model,
+            device=settings.huggingface_embedding_device,
             dimensions=settings.embedding_dimensions,
             timeout_seconds=settings.llm_timeout_seconds,
         )
-        provider = OllamaArtifactProvider(
-            base_url=str(settings.ollama_base_url),
-            model=settings.ollama_generation_model,
+        provider = HuggingFaceArtifactProvider(
+            model=settings.huggingface_generation_model,
+            device=settings.huggingface_generation_device,
+            max_input_characters=settings.local_model_max_input_characters,
+            max_new_tokens=settings.local_model_max_new_tokens,
             timeout_seconds=settings.llm_timeout_seconds,
         )
     return ArtifactService(

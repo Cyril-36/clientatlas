@@ -52,7 +52,7 @@ flowchart LR
     D --> DB["Supabase PostgreSQL + pgvector"]
     P --> DB
     N --> S["Private Supabase Storage"]
-    F --> O["Ollama local models"]
+    F --> H["Lightweight Hugging Face models"]
     F --> G["Gemini synthetic-only adapter"]
     T --> OT["OpenTelemetry"]
     F --> OT
@@ -65,7 +65,8 @@ flowchart LR
 - **Data layer:** Drizzle ORM, PostgreSQL 17, pgvector, forced RLS
 - **AI service:** Python, FastAPI, SQLAlchemy, hybrid retrieval, SSE streaming
 - **Identity and files:** Supabase Auth and private Supabase Storage
-- **Local models:** Ollama with `nomic-embed-text` and `qwen2.5:7b`
+- **Local models:** Sentence Transformers with `all-MiniLM-L6-v2` and
+  Transformers with `flan-t5-small`
 - **Quality and operations:** Vitest, Pytest, jest-axe, OpenTelemetry,
   Prometheus, Grafana, GitHub Actions
 
@@ -125,8 +126,8 @@ sources from the versioned synthetic dataset.
 
 The deterministic hash embedding is a reproducible test baseline, not a
 production model-quality claim. Citation precision and abstention evaluation
-are implemented, but generation scores remain unclaimed until the Ollama run is
-repeated and reviewed. Details are in
+are implemented, but generation scores remain unclaimed until the lightweight
+Hugging Face run is repeated and reviewed. Details are in
 [docs/EVALUATION.md](docs/EVALUATION.md).
 
 ## Zero-cost delivery model
@@ -134,7 +135,7 @@ repeated and reviewed. Details are in
 V1 is designed to require no mandatory cash expenditure:
 
 - **Local confidential mode** runs the complete ingestion, retrieval, editing,
-  and generation flow with Ollama.
+  and generation flow with downloaded Hugging Face models.
 - **Public portfolio mode** is synthetic and read-only. Uploads, OAuth,
   generation mutations, administration, and deletion are disabled.
 - **Supabase Free** provides Auth, PostgreSQL, pgvector, and private object
@@ -166,13 +167,13 @@ docs/                      PRD, RFC, threat model, API, runbooks, and backlog
 - Python 3.11–3.13
 - [uv](https://docs.astral.sh/uv/)
 - Docker Desktop
-- Ollama for real local embedding and generation
+- Enough local disk and memory for the optional lightweight Hugging Face models
 
 ### 1. Install dependencies
 
 ```bash
 npm ci
-uv sync --project services/ai --extra dev --locked
+uv sync --project services/ai --extra dev --extra local-models --locked
 ```
 
 ### 2. Start PostgreSQL and apply migrations
@@ -218,11 +219,16 @@ npm run dev:ai
 - AI health: `http://127.0.0.1:8000/health`
 - AI OpenAPI: `http://127.0.0.1:8000/docs`
 
-For confidential local generation:
+The first authenticated local model request downloads
+`sentence-transformers/all-MiniLM-L6-v2` and `google/flan-t5-small` into the
+normal Hugging Face cache. No Ollama daemon is required. The synthetic public
+demo does not load either model.
+
+Verify both local models with fictional input:
 
 ```bash
-ollama pull nomic-embed-text
-ollama pull qwen2.5:7b
+uv run --project services/ai --extra local-models \
+  python scripts/verify_local_models.py
 ```
 
 Leave `CLIENTATLAS_GEMINI_API_KEY` unset for confidential operation.
@@ -255,6 +261,7 @@ Prometheus runs on port `9090` and Grafana on port `3001`.
 
 - [Product requirements](docs/PRD.md)
 - [Architecture RFC](docs/architecture/RFC-001-clientatlas-v1.md)
+- [Lightweight local-model amendment](docs/architecture/RFC-002-lightweight-local-models.md)
 - [Data model and RLS contract](docs/DATA_MODEL.md)
 - [API and SSE contract](docs/API.md)
 - [Frontend routes and accessibility](docs/FRONTEND.md)
@@ -271,8 +278,8 @@ The remaining external acceptance gates are tracked explicitly:
 
 - complete the authenticated two-tenant Storage signed-URL matrix;
 - exercise Google Picker and token revocation with a development OAuth app;
-- repeat generation, citation, and abstention evaluation with local Ollama
-  models;
+- repeat retrieval, generation, citation, and abstention evaluation with the
+  lightweight local Hugging Face models;
 - complete the authenticated frontend-to-FastAPI acceptance flow;
 - deploy the synthetic read-only public demo; and
 - record the demonstration video.

@@ -186,6 +186,20 @@ suite("identity and tenancy RLS", () => {
       can_use: true
     });
 
+    const embeddingColumns = await admin<{ data_type: string }[]>`
+      select format_type(attribute.atttypid, attribute.atttypmod) as data_type
+      from pg_attribute attribute
+      join pg_class class on class.oid = attribute.attrelid
+      join pg_namespace namespace on namespace.oid = class.relnamespace
+      where namespace.nspname = 'app'
+        and class.relname = 'document_chunks'
+        and attribute.attname = 'embedding'
+        and not attribute.attisdropped
+    `;
+    expect(embeddingColumns).toEqual([
+      { data_type: "extensions.vector(384)" }
+    ]);
+
     const tables = await admin<
       { owner: string; relforcerowsecurity: boolean; relname: string }[]
     >`

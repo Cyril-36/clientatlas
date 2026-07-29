@@ -274,7 +274,7 @@ export const documentChunks = appSchema.table(
     locator: jsonb("locator")
       .$type<Record<string, string | number | boolean | null>>()
       .notNull(),
-    embedding: vector("embedding", { dimensions: 768 }).notNull(),
+    embedding: vector("embedding", { dimensions: 384 }).notNull(),
     createdAt: timestamp("created_at", {
       mode: "date",
       withTimezone: true

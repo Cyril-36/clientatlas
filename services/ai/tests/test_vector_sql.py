@@ -30,6 +30,8 @@ async def test_ingestion_qualifies_vector_type_schema() -> None:
             ),
         ),
         embeddings=[[1.0, 0.0]],
+        embedding_provider="test",
+        embedding_model="test-embedding",
     )
 
     statements = [str(call.args[0]) for call in session.execute.await_args_list]

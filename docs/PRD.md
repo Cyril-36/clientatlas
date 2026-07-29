@@ -57,8 +57,8 @@ producing a reviewable onboarding plan.
 
 The complete product runs locally. It supports authentication, uploads, Google
 Drive development-mode OAuth, ingestion, retrieval, generation, editing,
-re-indexing, and deletion. Ollama is the default generation provider for
-confidential documents.
+re-indexing, and deletion. Lightweight downloaded Hugging Face models are the
+default embedding and generation providers for confidential documents.
 
 ### 4.2 Public portfolio demo
 

@@ -232,6 +232,8 @@ async def activate_chunks(
     page_count: int | None,
     chunks: tuple[DocumentChunk, ...],
     embeddings: list[list[float]],
+    embedding_provider: str,
+    embedding_model: str,
 ) -> None:
     await session.execute(
         text("delete from app.document_chunks where document_version_id = :version_id"),
@@ -273,6 +275,8 @@ async def activate_chunks(
             set state = 'ready',
                 chunk_count = :chunk_count,
                 page_count = :page_count,
+                embedding_provider = :embedding_provider,
+                embedding_model = :embedding_model,
                 safe_error_code = null,
                 ready_at = now()
             where id = :version_id
@@ -280,6 +284,8 @@ async def activate_chunks(
         ),
         {
             "chunk_count": len(chunks),
+            "embedding_model": embedding_model,
+            "embedding_provider": embedding_provider,
             "page_count": page_count,
             "version_id": version_id,
         },

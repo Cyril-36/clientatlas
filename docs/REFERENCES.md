@@ -25,9 +25,14 @@ public deployment is presented as current.
 - [Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing)
 - [Gemini API additional terms](https://ai.google.dev/gemini-api/terms)
 
+## Local models
+
+- [Sentence Transformers all-MiniLM-L6-v2 model card](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+- [Google FLAN-T5-small model card](https://huggingface.co/google/flan-t5-small)
+- [Transformers pipeline documentation](https://huggingface.co/docs/transformers/main_classes/pipelines)
+
 ## Connectors
 
 - [Google Drive API scope selection](https://developers.google.com/workspace/drive/api/guides/api-specific-auth)
 - [Notion authorization guide](https://developers.notion.com/guides/get-started/authorization) -
   retained for the deferred connector, not V1 implementation.
-

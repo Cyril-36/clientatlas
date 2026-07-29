@@ -163,7 +163,7 @@ docs/
 ### Work
 
 - **P0** Define a versioned answer JSON/event schema.
-- **P0** Implement the Ollama provider.
+- **P0** Implement lightweight local Hugging Face providers.
 - **P0** Implement the synthetic-only Gemini provider.
 - **P0** Enforce workspace privacy mode server-side.
 - **P0** Stream progress, answer, citation, completion, and safe error events.
@@ -319,4 +319,3 @@ A work item is done when:
 - documentation and architecture references are updated;
 - no unrelated generated artifact is committed; and
 - a focused commit records the completed behavior.
-

@@ -21,11 +21,14 @@ class Settings(BaseSettings):
     supabase_jwks_url: AnyHttpUrl
     object_storage_root: Path = Path(".clientatlas/storage")
     max_upload_bytes: int = 25 * 1024 * 1024
-    ollama_base_url: AnyHttpUrl = AnyHttpUrl("http://127.0.0.1:11434")
-    ollama_embedding_model: str = "nomic-embed-text"
-    ollama_generation_model: str = "qwen2.5:7b"
-    embedding_dimensions: int = 768
-    llm_timeout_seconds: float = 90.0
+    huggingface_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    huggingface_generation_model: str = "google/flan-t5-small"
+    huggingface_embedding_device: str = "cpu"
+    huggingface_generation_device: int = -1
+    embedding_dimensions: int = 384
+    local_model_max_input_characters: int = 8_000
+    local_model_max_new_tokens: int = 256
+    llm_timeout_seconds: float = 180.0
     gemini_api_key: SecretStr | None = None
     gemini_model: str = "gemini-2.5-flash-lite"
     google_oauth_client_id: str | None = None

@@ -5,10 +5,12 @@ from uuid import uuid4
 import pytest
 
 from clientatlas_ai.artifacts import (
+    HuggingFaceArtifactProvider,
     evidence_pointers,
     validate_artifact_content,
 )
 from clientatlas_ai.errors import SafeServiceError
+from clientatlas_ai.generation import build_grounded_prompt
 from clientatlas_ai.retrieval import EvidenceChunk
 
 
@@ -71,3 +73,37 @@ def test_rejects_artifact_with_invented_evidence() -> None:
             artifact_type="readiness_report",
             allowed_evidence={evidence.chunk_id: evidence},
         )
+
+
+async def test_huggingface_artifact_provider_wraps_allowed_evidence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def fake_generate(*args: object, **kwargs: object) -> str:
+        del args, kwargs
+        return "Avery owns the launch plan."
+
+    monkeypatch.setattr(
+        "clientatlas_ai.artifacts.generate_text",
+        fake_generate,
+    )
+    evidence = chunk()
+    provider = HuggingFaceArtifactProvider(
+        model="google/flan-t5-small",
+        device=-1,
+        max_input_characters=8_000,
+        max_new_tokens=128,
+        timeout_seconds=1,
+    )
+    raw = await provider.generate(
+        build_grounded_prompt("Generate an onboarding brief.", (evidence,)),
+        {},
+        "onboarding_brief",
+        (evidence,),
+    )
+    content = validate_artifact_content(
+        raw,
+        artifact_type="onboarding_brief",
+        allowed_evidence={evidence.chunk_id: evidence},
+    )
+    assert content.summary[0].text == "Avery owns the launch plan."
+    assert content.summary[0].evidence_ids == [evidence.chunk_id]

@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from clientatlas_ai.auth import VerifiedClaims, require_verified_claims
 from clientatlas_ai.embeddings import (
     DeterministicEmbeddingProvider,
-    OllamaEmbeddingProvider,
+    HuggingFaceEmbeddingProvider,
 )
 from clientatlas_ai.retrieval import RetrievalService
 from clientatlas_ai.settings import get_settings
@@ -34,9 +34,9 @@ def get_retrieval_service() -> RetrievalService:
     provider = (
         DeterministicEmbeddingProvider(settings.embedding_dimensions)
         if settings.environment == "test"
-        else OllamaEmbeddingProvider(
-            base_url=str(settings.ollama_base_url),
-            model=settings.ollama_embedding_model,
+        else HuggingFaceEmbeddingProvider(
+            model=settings.huggingface_embedding_model,
+            device=settings.huggingface_embedding_device,
             dimensions=settings.embedding_dimensions,
             timeout_seconds=settings.llm_timeout_seconds,
         )

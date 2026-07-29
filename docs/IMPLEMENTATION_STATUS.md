@@ -1,6 +1,6 @@
 # ClientAtlas V1 Implementation Status
 
-Status date: 2026-07-24
+Status date: 2026-07-29
 
 ## Implemented and locally verified
 
@@ -12,7 +12,7 @@ Status date: 2026-07-24
   ingestion states, bounded retry state, re-indexing, and active-data deletion.
 - Generated Supabase Storage policies with narrow object-path authorization.
 - PostgreSQL full-text plus pgvector retrieval with RRF.
-- Ollama generation and embedding adapters.
+- Lightweight local Hugging Face generation and embedding adapters.
 - Synthetic-only Gemini adapter with server-side privacy routing.
 - Validated citations, abstention, plain-text SSE, and message persistence.
 - Versioned onboarding brief, readiness report, and action-plan schemas.
@@ -42,8 +42,8 @@ Status date: 2026-07-24
 - The real Supabase project must complete the authenticated Storage signed-URL
   matrix with two tenants.
 - A Google development OAuth app must exercise real Picker and revocation.
-- Ollama models must be downloaded for generation, citation, and abstention
-  evaluation.
+- The lightweight Hugging Face models must be downloaded for retrieval,
+  generation, citation, and abstention evaluation.
 - A configured authenticated frontend session must complete the live Supabase
   and FastAPI acceptance flow; the unconfigured default remains synthetic.
 - A free public host must be deployed with synthetic read-only data.

@@ -4,7 +4,7 @@ from functools import lru_cache
 
 from clientatlas_ai.embeddings import (
     DeterministicEmbeddingProvider,
-    OllamaEmbeddingProvider,
+    HuggingFaceEmbeddingProvider,
 )
 from clientatlas_ai.ingestion import IngestionService
 from clientatlas_ai.settings import get_settings
@@ -17,9 +17,9 @@ def get_ingestion_service() -> IngestionService:
     embeddings = (
         DeterministicEmbeddingProvider(settings.embedding_dimensions)
         if settings.environment == "test"
-        else OllamaEmbeddingProvider(
-            base_url=str(settings.ollama_base_url),
-            model=settings.ollama_embedding_model,
+        else HuggingFaceEmbeddingProvider(
+            model=settings.huggingface_embedding_model,
+            device=settings.huggingface_embedding_device,
             dimensions=settings.embedding_dimensions,
             timeout_seconds=settings.llm_timeout_seconds,
         )

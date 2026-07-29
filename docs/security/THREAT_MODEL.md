@@ -207,8 +207,8 @@ be used to decide whether tenant isolation passed.
 
 - Synthetic public-demo data is clearly labeled and reproducible from repository
   seeds.
-- Local confidential data remains on the user's machine when Ollama mode is
-  selected.
+- Local confidential data remains on the user's machine when the lightweight
+  Hugging Face mode is selected.
 - OAuth tokens are encrypted at the application layer and excluded from
   exports.
 - Evaluation fixtures cannot be created from confidential production failures
@@ -239,4 +239,3 @@ suspected:
   periods.
 - The public demo is not suitable for real client data or commercial production
   use.
-
